@@ -2,6 +2,7 @@
 const express = require('express')
 const router = new express.Router()
 const Task = require('../models/task')
+
 const auth = require('../middlewares/auth')
 
 
@@ -32,38 +33,71 @@ router.post('/tasks',auth,async(req, res)=>{
 // GET /tasks?completed=true
 // GET /tasks?limit=10&skip=20
 // GET /tasks?sortBy=createdAt:desc
-router.get('/tasks', auth,async(req, res)=>{
-    const match ={}
+// router.get('/tasks', auth,async(req, res)=>{
+//     const match ={}
+//     const sort = {}
+//     if (req.query.completed){
+//         match.completed = req.query.completed === 'true'
+//     }
+//     if (req.query.sortBy){
+//         const parts = req.query.sortBy.split(':')
+//         sort[parts[0]] = parts[1] === 'desc' ? -1 : 1
+//     }
+//     try{
+//         // const task = await Task.find({})
+//         await req.user.populate({
+//             path: 'tasks',
+//             match,
+//             // These limit and skips are used for pagination and these are queries provided by the browser
+//             limit: parseInt(req.query.limit),
+//             skip: parseInt(req.query.skip),
+//             sort: sort
+
+//         }).execPopulate()
+    
+//         res.send(req.user.tasks)
+//     } catch (e){
+//         res.status(500).send(e)
+//     }
+//     // Task.find().then((task)=>{
+//     //     res.send(task)
+//     // }).catch(()=>{
+//     //     res.status(500)
+//     // })
+// })
+
+router.get('/tasks', auth, async (req, res) => {
+    const match = {}
     const sort = {}
-    if (req.query.completed){
+
+    if (req.query.completed) {
         match.completed = req.query.completed === 'true'
     }
-    if (req.query.sortBy){
+
+    if (req.query.sortBy) {
         const parts = req.query.sortBy.split(':')
         sort[parts[0]] = parts[1] === 'desc' ? -1 : 1
     }
-    try{
-        // const task = await Task.find({})
+
+    try {
         await req.user.populate({
             path: 'tasks',
             match,
-            // These limit and skips are used for pagination and these are queries provided by the browser
-            limit: parseInt(req.query.limit),
-            skip: parseInt(req.query.skip),
-            sort: sort
-
-        }).execPopulate()
-    
+            options: {
+                limit: parseInt(req.query.limit),
+                skip: parseInt(req.query.skip),
+                sort
+            }
+        })
         res.send(req.user.tasks)
-    } catch (e){
-        res.status.send(e)
+    } catch (e) {
+        res.status(500).send()
     }
-    // Task.find().then((task)=>{
-    //     res.send(task)
-    // }).catch(()=>{
-    //     res.status(500)
-    // })
 })
+
+
+
+
 
 router.get('/tasks/:id',auth, async (req, res)=>{
     const _id = req.params.id

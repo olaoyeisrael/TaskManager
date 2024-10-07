@@ -121,6 +121,9 @@ userSchema.pre('remove', async function (next) {
     
 })
 
+userSchema.set('toObject', { virtuals: true });
+userSchema.set('toJSON', { virtuals: true });
+
 const User = mongoose.model('User', userSchema)
 
 module.exports = User;
